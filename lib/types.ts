@@ -10,6 +10,7 @@ export type Track = {
   episodes: string | null;
   videoUrl: string;
   audioUrl: string | null;
+  fastAudioUrl?: string | null;
   spoiler: boolean;
 };
 

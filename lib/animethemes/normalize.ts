@@ -1,3 +1,4 @@
+import type { FastAudioLookup } from "../anisongdb";
 import type { AnimeSummary, Track } from "../types";
 import type { RawAnime, RawImage, RawTheme, RawVideo } from "./raw-types";
 
@@ -41,9 +42,19 @@ export function toSummary(anime: RawAnime): AnimeSummary {
   };
 }
 
-export function themeToTracks(theme: RawTheme, anime: RawAnime): Track[] {
+export function malIdOf(anime: RawAnime): number | null {
+  return anime.resources?.find((r) => r.site === "MyAnimeList")?.external_id ?? null;
+}
+
+export function themeToTracks(theme: RawTheme, anime: RawAnime, fastAudio: FastAudioLookup): Track[] {
   const cover = pickImage(anime.images, "Large Cover");
   const artists = theme.song?.artists?.map((a) => a.name).join(", ") || "Artista desconhecido";
+  const fastAudioUrl = fastAudio({
+    malId: malIdOf(anime),
+    type: theme.type,
+    sequence: theme.sequence ?? 1,
+    title: theme.song?.title ?? null,
+  });
 
   return (theme.animethemeentries ?? []).flatMap((entry) => {
     if (!entry.videos?.length) return [];
@@ -61,11 +72,12 @@ export function themeToTracks(theme: RawTheme, anime: RawAnime): Track[] {
       episodes: entry.episodes,
       videoUrl: video.link,
       audioUrl: video.audio?.link ?? null,
+      fastAudioUrl,
       spoiler: entry.spoiler,
     };
   });
 }
 
-export function animeToTracks(anime: RawAnime): Track[] {
-  return sortThemes(anime.animethemes ?? []).flatMap((theme) => themeToTracks(theme, anime));
+export function animeToTracks(anime: RawAnime, fastAudio: FastAudioLookup): Track[] {
+  return sortThemes(anime.animethemes ?? []).flatMap((theme) => themeToTracks(theme, anime, fastAudio));
 }

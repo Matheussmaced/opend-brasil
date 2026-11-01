@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
 import type { Track } from "@/lib/types";
 import { useMediaSession, useSpacebar } from "./hooks";
-import { sourceFor } from "./media-source";
+import { fallbackSource, sourceFor } from "./media-source";
 import { PlaybackTimeContext, PlayerContext, type Mode, type PlaybackTime, type PlayerValue } from "./PlayerContext";
 import { initialQueueState, nextIndex, previousIndex, queueReducer } from "./queue-reducer";
 import { preloadSource } from "./preload";
@@ -144,10 +144,10 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const handleError = () => {
     const media = mediaRef.current;
-    if (media && current?.audioUrl && media.src === current.audioUrl) {
-      media.src = current.videoUrl;
-      media.play().catch(() => setIsPlaying(false));
-    }
+    const fallback = media && fallbackSource(current, mode, media.src);
+    if (!media || !fallback) return;
+    media.src = fallback;
+    media.play().catch(() => setIsPlaying(false));
   };
 
   useMediaSession(current, { toggle, next, prev });

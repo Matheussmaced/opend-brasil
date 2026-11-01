@@ -3,7 +3,8 @@ import { getPopularIdsByGenre } from "../anilist";
 import type { Season } from "../seasons";
 import type { AnimeDetail, AnimeSummary, Track } from "../types";
 import { animeThemesGet, ApiError, INCLUDE_IMAGES, INCLUDE_THEME_SEARCH, INCLUDE_THEMES } from "./client";
-import { animeToTracks, themeToTracks, toSummary } from "./normalize";
+import { loadFastAudio } from "../anisongdb";
+import { animeToTracks, malIdOf, themeToTracks, toSummary } from "./normalize";
 import type { RawAnime, RawTheme } from "./raw-types";
 
 const CATALOG_PAGE_SIZE = 48;
@@ -14,10 +15,12 @@ export type CatalogPage = Collection & { hasNext: boolean };
 
 type AnimeList = { anime: RawAnime[]; links?: { next: string | null } };
 
-function toCollection(anime: RawAnime[], withThemes: boolean): Collection {
+async function toCollection(anime: RawAnime[], withThemes: boolean): Promise<Collection> {
+  if (!withThemes) return { anime: anime.map(toSummary), tracks: [] };
+  const fastAudio = await loadFastAudio(anime.map(malIdOf));
   return {
     anime: anime.map(toSummary),
-    tracks: withThemes ? anime.flatMap(animeToTracks) : [],
+    tracks: anime.flatMap((a) => animeToTracks(a, fastAudio)),
   };
 }
 
@@ -50,7 +53,8 @@ export async function getAnime(slug: string): Promise<AnimeDetail | null> {
     const { anime } = await animeThemesGet<{ anime: RawAnime }>(`/anime/${encodeURIComponent(slug)}`, {
       include: INCLUDE_THEMES,
     });
-    return { ...toSummary(anime), tracks: animeToTracks(anime) };
+    const fastAudio = await loadFastAudio([malIdOf(anime)]);
+    return { ...toSummary(anime), tracks: animeToTracks(anime, fastAudio) };
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
@@ -69,9 +73,11 @@ export async function search(query: string): Promise<Collection> {
     "include[animetheme]": INCLUDE_THEME_SEARCH,
     "page[limit]": "15",
   });
+  const themes = search.animethemes ?? [];
+  const fastAudio = await loadFastAudio(themes.map((t) => (t.anime ? malIdOf(t.anime) : null)));
   return {
     anime: (search.anime ?? []).map(toSummary),
-    tracks: (search.animethemes ?? []).flatMap((t) => (t.anime ? themeToTracks(t, t.anime) : [])),
+    tracks: themes.flatMap((t) => (t.anime ? themeToTracks(t, t.anime, fastAudio) : [])),
   };
 }
 
@@ -89,7 +95,7 @@ export async function getGenre(
     "filter[site]": "AniList",
     "filter[external_id]": ids.join(","),
     "page[size]": "100",
-    include: `resources,${withThemes ? INCLUDE_THEMES : INCLUDE_IMAGES}`,
+    include: withThemes ? INCLUDE_THEMES : `resources,${INCLUDE_IMAGES}`,
   });
 
   const rank = new Map(ids.map((id, index) => [id, index]));
@@ -97,7 +103,7 @@ export async function getGenre(
     rank.get(anime.resources?.find((r) => r.site === "AniList")?.external_id ?? -1) ?? Infinity;
   const sorted = [...data.anime].sort((a, b) => position(a) - position(b));
 
-  return { ...toCollection(sorted, withThemes), hasNext };
+  return { ...(await toCollection(sorted, withThemes)), hasNext };
 }
 
 async function getCatalogPage(filters: Record<string, string>, page: number): Promise<CatalogPage> {
@@ -110,7 +116,7 @@ async function getCatalogPage(filters: Record<string, string>, page: number): Pr
     },
     true,
   );
-  return { ...toCollection(data.anime, true), hasNext: Boolean(data.links?.next) };
+  return { ...(await toCollection(data.anime, true)), hasNext: Boolean(data.links?.next) };
 }
 
 export async function getByLetter(letter: string, page = 1) {

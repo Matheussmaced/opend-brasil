@@ -5,6 +5,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { PlayerBar } from "@/components/player/PlayerBar";
 import { PlayerProvider } from "@/components/player/PlayerProvider";
+import { FAST_AUDIO_ORIGIN } from "@/lib/anisongdb";
 import { SITE } from "@/lib/site";
 import "./globals.css";
 
@@ -33,7 +34,7 @@ export const metadata: Metadata = {
   applicationName: SITE.name,
 };
 
-const MEDIA_ORIGINS = ["https://a.animethemes.moe", "https://v.animethemes.moe"];
+const MEDIA_ORIGINS = [FAST_AUDIO_ORIGIN, "https://a.animethemes.moe", "https://v.animethemes.moe"];
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   MEDIA_ORIGINS.forEach((origin) => preconnect(origin));
