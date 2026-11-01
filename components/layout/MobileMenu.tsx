@@ -51,8 +51,8 @@ export function MobileMenu({ children }: { children: ReactNode }) {
         aria-label="Menu"
         inert={!open}
         onClick={closeOnLinkClick}
-        className={`fixed inset-y-0 left-0 z-60 flex w-72 max-w-[85vw] flex-col gap-6 border-r-2 border-sakura bg-ink-900 px-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-panel transition-transform duration-300 ${
-          open ? "translate-x-0" : "-translate-x-full"
+        className={`fixed inset-y-0 left-0 z-60 flex w-72 max-w-[85vw] flex-col gap-6 border-r-2 border-sakura bg-ink-900 px-4 pt-[max(1.25rem,env(safe-area-inset-top))] pb-[max(1.25rem,env(safe-area-inset-bottom))] transition-[translate,box-shadow] duration-300 ${
+          open ? "translate-x-0 shadow-panel" : "-translate-x-full shadow-none"
         }`}
       >
         <div className="flex items-center justify-between gap-3">
