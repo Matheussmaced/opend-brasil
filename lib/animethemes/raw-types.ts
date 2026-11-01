@@ -38,4 +38,5 @@ export type RawAnime = {
   images?: RawImage[];
   animethemes?: RawTheme[];
   resources?: { site: string; external_id: number | null }[];
+  series?: { slug: string; name: string }[];
 };

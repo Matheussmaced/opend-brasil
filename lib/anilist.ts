@@ -1,4 +1,5 @@
 const ENDPOINT = "https://graphql.anilist.co";
+const REVALIDATE_SECONDS = 60 * 60 * 24;
 
 const POPULAR_BY_GENRE = `
   query ($genre: String, $perPage: Int, $page: Int) {
@@ -18,6 +19,8 @@ export async function getPopularIdsByGenre(genre: string, perPage: number, page:
     method: "POST",
     headers: { "Content-Type": "application/json", Accept: "application/json" },
     body: JSON.stringify({ query: POPULAR_BY_GENRE, variables: { genre, perPage, page } }),
+    cache: "force-cache",
+    next: { revalidate: REVALIDATE_SECONDS },
   });
   if (!res.ok) throw new Error(`AniList respondeu ${res.status} ao buscar o gênero ${genre}`);
 

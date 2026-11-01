@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { AnimeHero } from "@/components/anime/AnimeHero";
 import { AnimeThemes } from "@/components/anime/AnimeThemes";
+import { RelatedSeasons, RelatedSeasonsSkeleton } from "@/components/anime/RelatedSeasons";
 import { PlaybackButtons } from "@/components/track/PlaybackButtons";
 import { TrackListSkeleton } from "@/components/track/TrackListSkeleton";
 import { PageContainer } from "@/components/ui/PageContainer";
@@ -32,6 +33,11 @@ async function AnimeContent({ params }: Pick<PageProps<"/anime/[slug]">, "params
       <PageContainer className="space-y-10 pt-6">
         <PlaybackButtons tracks={anime.tracks} />
         <AnimeThemes tracks={anime.tracks} />
+        {anime.series.length > 0 && (
+          <Suspense fallback={<RelatedSeasonsSkeleton />}>
+            <RelatedSeasons series={anime.series} currentId={anime.id} />
+          </Suspense>
+        )}
         {anime.synopsis && (
           <section className="max-w-3xl">
             <SectionHeading title="Sinopse" kana="あらすじ" />

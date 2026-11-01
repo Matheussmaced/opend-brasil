@@ -25,4 +25,4 @@ export type AnimeSummary = {
   synopsis: string | null;
 };
 
-export type AnimeDetail = AnimeSummary & { tracks: Track[] };
+export type AnimeDetail = AnimeSummary & { tracks: Track[]; series: string[] };

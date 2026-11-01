@@ -2,6 +2,7 @@ import { cacheLife } from "next/cache";
 
 const ENDPOINT = "https://anisongdb.com/api/mal_ids_request";
 const MAX_IDS_PER_REQUEST = 500;
+const REVALIDATE_SECONDS = 60 * 60 * 24 * 7;
 const SONG_TYPE = /^(Opening|Ending) (\d+)$/;
 const TYPE_CODE: Record<string, string> = { Opening: "OP", Ending: "ED" };
 
@@ -38,6 +39,8 @@ async function getFastSongs(malIds: number[]): Promise<FastSong[]> {
       mal_ids: malIds,
       filters: { song_types: ["opening", "ending"], broadcasts: ["normal"] },
     }),
+    cache: "force-cache",
+    next: { revalidate: REVALIDATE_SECONDS },
   });
   if (!res.ok) throw new Error(`AnisongDB respondeu ${res.status}`);
 

@@ -1,9 +1,17 @@
 import { cacheLife } from "next/cache";
 import { getPopularIdsByGenre } from "../anilist";
-import type { Season } from "../seasons";
+import { SEASONS, type Season } from "../seasons";
 import type { AnimeDetail, AnimeSummary, Track } from "../types";
-import { animeThemesGet, ApiError, INCLUDE_IMAGES, INCLUDE_THEME_SEARCH, INCLUDE_THEMES } from "./client";
 import { loadFastAudio } from "../anisongdb";
+import {
+  animeThemesGet,
+  ApiError,
+  INCLUDE_ANIME_SEARCH,
+  INCLUDE_IMAGES,
+  INCLUDE_THEME_SEARCH,
+  INCLUDE_THEMES,
+  RESOURCE_FIELDS,
+} from "./client";
 import { animeToTracks, malIdOf, themeToTracks, toSummary } from "./normalize";
 import type { RawAnime, RawTheme } from "./raw-types";
 
@@ -27,6 +35,7 @@ async function toCollection(anime: RawAnime[], withThemes: boolean): Promise<Col
 function listAnime(params: Record<string, string>, withThemes: boolean) {
   return animeThemesGet<AnimeList>("/anime", {
     ...params,
+    ...RESOURCE_FIELDS,
     include: withThemes ? INCLUDE_THEMES : INCLUDE_IMAGES,
   });
 }
@@ -51,14 +60,34 @@ export async function getAnime(slug: string): Promise<AnimeDetail | null> {
   cacheLife("hours");
   try {
     const { anime } = await animeThemesGet<{ anime: RawAnime }>(`/anime/${encodeURIComponent(slug)}`, {
-      include: INCLUDE_THEMES,
+      ...RESOURCE_FIELDS,
+      include: `${INCLUDE_THEMES},series`,
     });
     const fastAudio = await loadFastAudio([malIdOf(anime)]);
-    return { ...toSummary(anime), tracks: animeToTracks(anime, fastAudio) };
+    return {
+      ...toSummary(anime),
+      tracks: animeToTracks(anime, fastAudio),
+      series: (anime.series ?? []).map((s) => s.slug),
+    };
   } catch (error) {
     if (error instanceof ApiError && error.status === 404) return null;
     throw error;
   }
+}
+
+function chronological(a: AnimeSummary, b: AnimeSummary) {
+  const seasonIndex = (s: AnimeSummary) => SEASONS.indexOf(s.season as Season);
+  return (a.year ?? Infinity) - (b.year ?? Infinity) || seasonIndex(a) - seasonIndex(b);
+}
+
+export async function getSeries(slug: string): Promise<AnimeSummary[]> {
+  "use cache";
+  cacheLife("days");
+  const { series } = await animeThemesGet<{ series: { anime?: RawAnime[] } }>(
+    `/series/${encodeURIComponent(slug)}`,
+    { include: `anime.${INCLUDE_IMAGES}` },
+  );
+  return (series.anime ?? []).map(toSummary).sort(chronological);
 }
 
 export async function search(query: string): Promise<Collection> {
@@ -69,15 +98,20 @@ export async function search(query: string): Promise<Collection> {
   }>("/search", {
     q: query,
     "fields[search]": "anime,animethemes",
-    "include[anime]": INCLUDE_IMAGES,
+    ...RESOURCE_FIELDS,
+    "include[anime]": INCLUDE_ANIME_SEARCH,
     "include[animetheme]": INCLUDE_THEME_SEARCH,
     "page[limit]": "15",
   });
-  const themes = search.animethemes ?? [];
-  const fastAudio = await loadFastAudio(themes.map((t) => (t.anime ? malIdOf(t.anime) : null)));
+  const anime = search.anime ?? [];
+  const resources = new Map(anime.map((a) => [a.id, a.resources]));
+  const themes = (search.animethemes ?? []).flatMap((theme) =>
+    theme.anime ? { theme, anime: { ...theme.anime, resources: resources.get(theme.anime.id) } } : [],
+  );
+  const fastAudio = await loadFastAudio(themes.map((t) => malIdOf(t.anime)));
   return {
-    anime: (search.anime ?? []).map(toSummary),
-    tracks: themes.flatMap((t) => (t.anime ? themeToTracks(t, t.anime, fastAudio) : [])),
+    anime: anime.map(toSummary),
+    tracks: themes.flatMap((t) => themeToTracks(t.theme, t.anime, fastAudio)),
   };
 }
 
@@ -95,6 +129,7 @@ export async function getGenre(
     "filter[site]": "AniList",
     "filter[external_id]": ids.join(","),
     "page[size]": "100",
+    ...RESOURCE_FIELDS,
     include: withThemes ? INCLUDE_THEMES : `resources,${INCLUDE_IMAGES}`,
   });
 
