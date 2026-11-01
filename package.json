@@ -6,7 +6,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "tsc --noEmit",
+    "check": "tsc --noEmit && eslint",
+    "build:verify": "node scripts/build-verify.mjs"
   },
   "dependencies": {
     "next": "16.4.3",
