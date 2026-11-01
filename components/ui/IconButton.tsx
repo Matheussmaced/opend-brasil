@@ -12,8 +12,8 @@ export function IconButton({ label, active = false, className = "", ...props }: 
       aria-label={label}
       title={label}
       aria-pressed={active || undefined}
-      className={`relative rounded-full p-2 transition disabled:opacity-30 ${
-        active ? "text-rose-400" : "text-zinc-400 hover:text-white"
+      className={`relative rounded-lg p-2 transition disabled:opacity-30 ${
+        active ? "bg-sakura/15 text-sakura" : "text-ink-300 hover:bg-white/5 hover:text-white"
       } ${className}`}
       {...props}
     />

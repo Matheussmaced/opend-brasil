@@ -2,7 +2,7 @@
 
 import type { Track } from "@/lib/types";
 import { usePlayer } from "../player/PlayerContext";
-import { PauseIcon, PlayIcon } from "../ui/icons";
+import { PauseIcon, PlayIcon, ShuffleIcon } from "../ui/icons";
 import { pillClass } from "../ui/PillLink";
 
 function shuffled<T>(items: T[]): T[] {
@@ -25,9 +25,11 @@ export function PlayAllButton({ tracks, label = "Tocar tudo" }: { tracks: Track[
       disabled={!tracks.length}
       aria-label={label}
       title={label}
-      className="grid size-14 place-items-center rounded-full bg-rose-500 text-black shadow-lg transition hover:scale-105 hover:bg-rose-400 disabled:opacity-40"
+      className="m-2 grid size-12 rotate-45 place-items-center rounded-xl bg-linear-to-br from-sakura to-neon text-ink-950 shadow-[4px_4px_0_0_var(--color-sun)] transition hover:scale-110 disabled:opacity-40"
     >
-      {isThisPlaylist && isPlaying ? <PauseIcon width={24} height={24} /> : <PlayIcon width={24} height={24} />}
+      <span className="-rotate-45">
+        {isThisPlaylist && isPlaying ? <PauseIcon width={24} height={24} /> : <PlayIcon width={24} height={24} />}
+      </span>
     </button>
   );
 }
@@ -41,6 +43,7 @@ export function ShuffleButton({ tracks }: { tracks: Track[] }) {
       disabled={!tracks.length}
       className={pillClass("outline")}
     >
+      <ShuffleIcon width={16} height={16} />
       Embaralhar
     </button>
   );

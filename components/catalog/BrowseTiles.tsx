@@ -1,30 +1,24 @@
-import { FORMATS, formatHref, GENRES, genreHref } from "@/lib/categories";
-import { getCurrentSeason, recentSeasons, seasonHref, seasonName } from "@/lib/seasons";
-import { TileGrid } from "./TileGrid";
+import { FORMATS, formatHref, GENRES, genreHref, type Category } from "@/lib/categories";
+import { getCurrentSeason, recentSeasons, seasonHref, seasonName, type Season } from "@/lib/seasons";
+import { TileGrid, type Tile } from "./TileGrid";
 
-const SEASON_COLORS = [
-  "from-rose-600 to-orange-500",
-  "from-violet-600 to-fuchsia-500",
-  "from-sky-600 to-cyan-400",
-  "from-emerald-600 to-lime-500",
-];
+const SEASON_STYLE: Record<Season, { kana: string; color: string }> = {
+  Winter: { kana: "冬", color: "from-sky-500 to-indigo-700" },
+  Spring: { kana: "春", color: "from-pink-400 to-rose-600" },
+  Summer: { kana: "夏", color: "from-amber-400 to-orange-600" },
+  Fall: { kana: "秋", color: "from-orange-600 to-red-800" },
+};
+
+function toTiles(categories: Category[], href: (slug: string) => string): Tile[] {
+  return categories.map((c) => ({ href: href(c.slug), label: c.label, kana: c.kana, color: c.color }));
+}
 
 export function GenreTiles({ title = "Todos os gêneros" }: { title?: string }) {
-  return (
-    <TileGrid
-      title={title}
-      tiles={GENRES.map((g) => ({ href: genreHref(g.slug), label: g.label, color: g.color }))}
-    />
-  );
+  return <TileGrid title={title} kana="ジャンル" tiles={toTiles(GENRES, genreHref)} />;
 }
 
 export function FormatTiles() {
-  return (
-    <TileGrid
-      title="Por formato"
-      tiles={FORMATS.map((f) => ({ href: formatHref(f.slug), label: f.label, color: f.color }))}
-    />
-  );
+  return <TileGrid title="Por formato" kana="フォーマット" tiles={toTiles(FORMATS, formatHref)} />;
 }
 
 export async function SeasonTiles({ count = 8 }: { count?: number }) {
@@ -32,11 +26,12 @@ export async function SeasonTiles({ count = 8 }: { count?: number }) {
   return (
     <TileGrid
       title="Navegar por temporada"
-      tiles={seasons.map((s, i) => ({
+      kana="シーズン"
+      tiles={seasons.map((s) => ({
         href: seasonHref(s),
         label: seasonName(s.season),
-        color: SEASON_COLORS[i % SEASON_COLORS.length],
         badge: s.year,
+        ...SEASON_STYLE[s.season],
       }))}
     />
   );

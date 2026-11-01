@@ -67,6 +67,11 @@ export const CloseIcon = (p: P) => (
     <path d="M6 6l12 12M18 6 6 18" />
   </svg>
 );
+export const MenuIcon = (p: P) => (
+  <svg {...base({ fill: "none", stroke: "currentColor", strokeWidth: 2.2, strokeLinecap: "round", ...p })}>
+    <path d="M4 7h16M4 12h10M4 17h16" />
+  </svg>
+);
 export const MusicIcon = (p: P) => (
   <svg {...base({ fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round", strokeLinejoin: "round", ...p })}>
     <path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" />

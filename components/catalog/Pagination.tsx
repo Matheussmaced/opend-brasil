@@ -14,7 +14,9 @@ export function Pagination({ basePath, page, hasNext }: PaginationProps) {
           ← Anterior
         </PillLink>
       )}
-      <span className="text-sm text-zinc-400">Página {page}</span>
+      <span className="font-display text-sm text-ink-300">
+        {page} <span className="text-sakura-soft">ページ</span>
+      </span>
       {hasNext && <PillLink href={pageHref(basePath, page + 1)}>Próxima →</PillLink>}
     </nav>
   );

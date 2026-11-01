@@ -4,6 +4,8 @@ import { AnimeHero } from "@/components/anime/AnimeHero";
 import { AnimeThemes } from "@/components/anime/AnimeThemes";
 import { PlaybackButtons } from "@/components/track/PlaybackButtons";
 import { TrackListSkeleton } from "@/components/track/TrackListSkeleton";
+import { PageContainer } from "@/components/ui/PageContainer";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { Skeleton } from "@/components/ui/Skeleton";
 import { getAnime } from "@/lib/animethemes/queries";
 
@@ -27,30 +29,32 @@ async function AnimeContent({ params }: Pick<PageProps<"/anime/[slug]">, "params
   return (
     <>
       <AnimeHero anime={anime} />
-      <div className="space-y-10 px-4 pb-12 sm:px-8">
+      <PageContainer className="space-y-10 pt-6">
         <PlaybackButtons tracks={anime.tracks} />
         <AnimeThemes tracks={anime.tracks} />
         {anime.synopsis && (
           <section className="max-w-3xl">
-            <h2 className="mb-3 text-xl font-bold">Sinopse</h2>
-            <p className="text-sm leading-relaxed whitespace-pre-line text-zinc-400">{anime.synopsis}</p>
+            <SectionHeading title="Sinopse" kana="あらすじ" />
+            <p className="rounded-xl border-2 border-ink-700 bg-ink-900/80 p-4 text-sm leading-relaxed whitespace-pre-line text-ink-300">
+              {anime.synopsis}
+            </p>
           </section>
         )}
-      </div>
+      </PageContainer>
     </>
   );
 }
 
 function AnimeSkeleton() {
   return (
-    <div className="px-4 pt-16 sm:px-8">
+    <PageContainer className="pt-14">
       <div className="flex items-end gap-6">
-        <Skeleton className="aspect-3/4 w-40 rounded-md sm:w-52" />
+        <Skeleton className="aspect-3/4 w-40 rounded-xl sm:w-52" />
         <Skeleton className="h-12 w-72" />
       </div>
       <div className="mt-10">
         <TrackListSkeleton />
       </div>
-    </div>
+    </PageContainer>
   );
 }

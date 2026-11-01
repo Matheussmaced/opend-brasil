@@ -4,6 +4,7 @@ import { CategoryNav } from "@/components/catalog/CategoryNav";
 import { Pagination } from "@/components/catalog/Pagination";
 import { CollectionSkeleton } from "@/components/collection/CollectionSkeleton";
 import { CollectionView, collectionSummary } from "@/components/collection/CollectionView";
+import { PageContainer } from "@/components/ui/PageContainer";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getByFormat, getByLetter, getGenre, type CatalogPage } from "@/lib/animethemes/queries";
 import { resolveCategory, type ResolvedCategory } from "@/lib/categories";
@@ -43,13 +44,13 @@ async function ExploreContent({ params, searchParams }: Props) {
 
   return (
     <>
-      <PageHeader eyebrow={category.eyebrow} title={category.title} gradient={category.color} />
-      <div className="space-y-8 px-4 pt-6 pb-12 sm:px-8">
+      <PageHeader eyebrow={category.eyebrow} title={category.title} kana={category.kana} gradient={category.color} />
+      <PageContainer className="space-y-8 pt-6">
         <CategoryNav activeHref={category.tabKey} activeLetter={category.letter} />
         <Suspense key={page} fallback={<CollectionSkeleton />}>
           <CategoryResults category={category} page={page} basePath={`/explorar/${tipo}/${valor}`} />
         </Suspense>
-      </div>
+      </PageContainer>
     </>
   );
 }
@@ -58,7 +59,7 @@ type ResultsProps = { category: ResolvedCategory; page: number; basePath: string
 
 async function CategoryResults({ category, page, basePath }: ResultsProps) {
   const { anime, tracks, hasNext } = await LOADERS[category.kind](category.value, page);
-  if (!anime.length) return <p className="py-12 text-center text-zinc-400">Nenhum anime encontrado nesta página.</p>;
+  if (!anime.length) return <p className="py-12 text-center text-ink-300">Nenhum anime encontrado nesta página.</p>;
 
   return (
     <div className="space-y-10">

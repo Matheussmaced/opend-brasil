@@ -2,11 +2,14 @@ import { notFound } from "next/navigation";
 import { Suspense } from "react";
 import { CollectionSkeleton } from "@/components/collection/CollectionSkeleton";
 import { CollectionView, collectionSummary } from "@/components/collection/CollectionView";
+import { PageContainer } from "@/components/ui/PageContainer";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getSeason } from "@/lib/animethemes/queries";
-import { parseSeason, seasonLabel } from "@/lib/seasons";
+import { parseSeason, seasonLabel, type Season } from "@/lib/seasons";
 
 const MIN_YEAR = 1960;
+
+const SEASON_KANA: Record<Season, string> = { Winter: "冬", Spring: "春", Summer: "夏", Fall: "秋" };
 
 export default function SeasonPage({ params }: PageProps<"/temporada/[year]/[season]">) {
   return (
@@ -26,10 +29,15 @@ async function SeasonContent({ params }: Pick<PageProps<"/temporada/[year]/[seas
 
   return (
     <>
-      <PageHeader eyebrow="Temporada" title={seasonLabel({ year, season })} gradient="from-violet-800 to-zinc-900" />
-      <div className="px-4 pt-6 pb-12 sm:px-8">
+      <PageHeader
+        eyebrow="Temporada · シーズン"
+        title={seasonLabel({ year, season })}
+        kana={SEASON_KANA[season]}
+        gradient="from-ink-500 to-ink-800"
+      />
+      <PageContainer className="pt-6">
         <CollectionView anime={anime} tracks={tracks} summary={collectionSummary(anime, tracks)} />
-      </div>
+      </PageContainer>
     </>
   );
 }

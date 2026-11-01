@@ -1,5 +1,7 @@
+import { SITE } from "../site";
+
 const BASE_URL = "https://api.animethemes.moe";
-const HEADERS = { Accept: "application/json", "User-Agent": "animes-ceara" };
+const HEADERS = { Accept: "application/json", "User-Agent": SITE.slug };
 
 const THEME_INCLUDES = ["song.artists", "animethemeentries.videos.audio"];
 

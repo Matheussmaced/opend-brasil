@@ -2,6 +2,7 @@ import type { AnimeSummary, Track } from "@/lib/types";
 import { AnimeGrid } from "../anime/AnimeGrid";
 import { PlaybackButtons } from "../track/PlaybackButtons";
 import { TrackList } from "../track/TrackList";
+import { SectionHeading } from "../ui/SectionHeading";
 
 const VISIBLE_TRACKS = 15;
 
@@ -20,18 +21,18 @@ export function CollectionView({ anime, tracks, summary }: CollectionViewProps) 
       <section className="space-y-4">
         <div className="flex flex-wrap items-center gap-4">
           <PlaybackButtons tracks={openings} label="Tocar todas as aberturas" />
-          {summary && <p className="text-sm text-zinc-400">{summary}</p>}
+          {summary && <p className="text-sm text-ink-300">{summary}</p>}
         </div>
-        <h2 className="text-2xl font-bold">Aberturas</h2>
+        <SectionHeading title="Aberturas" kana="オープニング" />
         <TrackList tracks={openings} limit={VISIBLE_TRACKS} />
         {hidden > 0 && (
-          <p className="text-sm text-zinc-500">
+          <p className="text-sm text-ink-300">
             Mais {hidden} aberturas entram na fila quando você aperta o play.
           </p>
         )}
       </section>
       <section>
-        <h2 className="mb-4 text-2xl font-bold">Animes</h2>
+        <SectionHeading title="Animes" kana="アニメ" />
         <AnimeGrid anime={anime} />
       </section>
     </div>

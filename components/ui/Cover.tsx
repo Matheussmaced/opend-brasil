@@ -12,9 +12,9 @@ type CoverProps = CoverSize & {
 
 export function Cover({ src, alt, className = "", preload = false, ...size }: CoverProps) {
   return (
-    <div className={`relative shrink-0 overflow-hidden bg-zinc-800 ${className}`}>
+    <div className={`relative shrink-0 overflow-hidden bg-ink-800 ${className}`}>
       {!src ? (
-        <div className="grid size-full place-items-center text-zinc-500">
+        <div className="grid size-full place-items-center text-ink-500">
           <MusicIcon />
         </div>
       ) : size.sizes ? (

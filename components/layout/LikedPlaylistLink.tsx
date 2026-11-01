@@ -5,15 +5,18 @@ import { useLikes } from "@/lib/likes";
 import { HeartIcon } from "../ui/icons";
 
 export function LikedPlaylistLink() {
-  const likes = useLikes();
+  const count = useLikes().length;
   return (
-    <Link href="/curtidas" className="flex items-center gap-3 rounded-md p-2 hover:bg-zinc-800">
-      <span className="grid size-12 place-items-center rounded bg-linear-to-br from-rose-600 to-violet-500">
+    <Link
+      href="/curtidas"
+      className="group flex items-center gap-3 rounded-xl border-2 border-ink-700 bg-ink-800/60 p-2 transition hover:border-sakura"
+    >
+      <span className="grid size-12 shrink-0 place-items-center rounded-lg bg-linear-to-br from-sakura to-ink-700 transition group-hover:-rotate-6">
         <HeartIcon filled width={20} height={20} />
       </span>
-      <span>
-        <span className="block text-sm font-medium">Músicas curtidas</span>
-        <span className="block text-xs text-zinc-400">Playlist · {likes.length} músicas</span>
+      <span className="min-w-0">
+        <span className="block truncate text-sm font-bold">Músicas curtidas</span>
+        <span className="block text-xs text-ink-300">Playlist · {count} músicas</span>
       </span>
     </Link>
   );

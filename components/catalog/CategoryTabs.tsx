@@ -9,15 +9,15 @@ const TABS = [
 
 export function CategoryTabs({ activeHref }: { activeHref?: string }) {
   return (
-    <nav aria-label="Categorias" className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-2">
+    <nav aria-label="Categorias" className="-mx-1 flex gap-2 overflow-x-auto px-3 py-1">
       {TABS.map((tab) => (
         <Link
           key={tab.href}
           href={tab.href}
           aria-current={tab.href === activeHref ? "page" : undefined}
-          className="shrink-0 rounded-full bg-white/10 px-4 py-1.5 text-sm font-medium transition hover:bg-white/20 aria-[current=page]:bg-white aria-[current=page]:text-black"
+          className="shrink-0 -skew-x-12 border-2 border-ink-700 bg-ink-900/80 px-4 py-1.5 text-sm font-bold text-ink-300 transition hover:border-neon hover:text-neon aria-[current=page]:border-sakura aria-[current=page]:bg-sakura aria-[current=page]:text-ink-950"
         >
-          {tab.label}
+          <span className="inline-block skew-x-12">{tab.label}</span>
         </Link>
       ))}
     </nav>

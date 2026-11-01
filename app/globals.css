@@ -3,11 +3,26 @@
 @theme inline {
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  --font-display: var(--font-dela-gothic);
 }
 
 @theme {
-  --spacing-player: 5rem;
+  --color-ink-950: #07051a;
+  --color-ink-900: #0e0b2b;
+  --color-ink-800: #19153f;
+  --color-ink-700: #2a2463;
+  --color-ink-500: #6b63b5;
+  --color-ink-300: #a9a3dd;
+  --color-sakura: #ff6fb5;
+  --color-sakura-soft: #ffb8dc;
+  --color-neon: #5ef2ff;
+  --color-sun: #ffd84d;
+
+  --spacing-player: 6.5rem;
+
   --animate-equalizer: equalizer 0.8s ease-in-out infinite;
+  --animate-disc: spin 6s linear infinite;
+  --animate-float: float 4s ease-in-out infinite;
 
   @keyframes equalizer {
     0%,
@@ -18,4 +33,35 @@
       height: 100%;
     }
   }
+
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-6px);
+    }
+  }
+}
+
+@utility bg-halftone {
+  background-image: radial-gradient(color-mix(in oklab, var(--color-ink-300) 18%, transparent) 1px, transparent 1.5px);
+  background-size: 14px 14px;
+}
+
+@utility bg-speedlines {
+  background-image: repeating-conic-gradient(
+    from 0deg at 85% 50%,
+    color-mix(in oklab, white 7%, transparent) 0deg 1.5deg,
+    transparent 1.5deg 9deg
+  );
+}
+
+@utility shadow-panel {
+  box-shadow: 5px 5px 0 0 var(--color-sakura);
+}
+
+@utility shadow-panel-neon {
+  box-shadow: 5px 5px 0 0 var(--color-neon);
 }

@@ -9,7 +9,7 @@ export function PlayerProgress() {
   const { time, duration } = usePlaybackTime();
 
   return (
-    <div className="flex w-full items-center gap-2 text-[11px] tabular-nums text-zinc-400">
+    <div className="flex w-full items-center gap-2 font-mono text-[11px] text-ink-300">
       <span className="w-10 text-right">{formatTime(time)}</span>
       <Slider
         label="Posição"
@@ -30,8 +30,8 @@ export function MobileProgress() {
   const percent = duration ? (time / duration) * 100 : 0;
 
   return (
-    <div className="absolute inset-x-0 top-0 h-0.5 bg-zinc-800 sm:hidden">
-      <div className="h-full bg-rose-500" style={{ width: `${percent}%` }} />
+    <div className="absolute inset-x-0 bottom-0 h-1 bg-ink-800 lg:hidden">
+      <div className="h-full bg-linear-to-r from-sakura to-neon" style={{ width: `${percent}%` }} />
     </div>
   );
 }

@@ -4,21 +4,22 @@ import { Skeleton } from "../ui/Skeleton";
 import { AnimeCard } from "./AnimeCard";
 import { AnimeCardSkeleton } from "./AnimeGrid";
 
-const ROW_ITEM = "w-40 shrink-0 snap-start sm:w-44";
+const ROW_ITEM = "w-36 shrink-0 snap-start sm:w-44";
 
 type AnimeRowProps = {
   title: string;
   eyebrow?: string;
+  kana?: string;
   href?: string;
   anime: AnimeSummary[];
 };
 
-export function AnimeRow({ title, eyebrow, href, anime }: AnimeRowProps) {
+export function AnimeRow({ title, eyebrow, kana, href, anime }: AnimeRowProps) {
   if (!anime.length) return null;
   return (
     <section>
-      <SectionHeading title={title} eyebrow={eyebrow} href={href} />
-      <div className="-mx-2 flex snap-x gap-2 overflow-x-auto px-2 pb-3">
+      <SectionHeading title={title} eyebrow={eyebrow} kana={kana} href={href} />
+      <div className="-mx-2 flex snap-x gap-3 overflow-x-auto px-2 pt-1 pb-4">
         {anime.map((a) => (
           <div key={a.id} className={ROW_ITEM}>
             <AnimeCard anime={a} width={176} />

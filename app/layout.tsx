@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Dela_Gothic_One, Geist, Geist_Mono } from "next/font/google";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { PlayerBar } from "@/components/player/PlayerBar";
 import { PlayerProvider } from "@/components/player/PlayerProvider";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -16,26 +17,32 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const delaGothic = Dela_Gothic_One({
+  variable: "--font-dela-gothic",
+  weight: "400",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
   title: {
-    default: "Animes Ceará — aberturas e encerramentos de anime",
-    template: "%s · Animes Ceará",
+    default: `${SITE.name} — ${SITE.tagline}`,
+    template: `%s · ${SITE.name}`,
   },
-  description:
-    "Ouça e assista às aberturas (OP) e encerramentos (ED) dos seus animes favoritos. Dados e vídeos do AnimeThemes.moe.",
+  description: SITE.description,
+  applicationName: SITE.name,
 };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  const fonts = `${geistSans.variable} ${geistMono.variable} ${delaGothic.variable}`;
+
   return (
-    <html lang="pt-BR" className={`${geistSans.variable} ${geistMono.variable} h-full scheme-dark antialiased`}>
-      <body className="h-full overflow-hidden bg-black font-sans text-white">
+    <html lang="pt-BR" className={`${fonts} h-full scheme-dark antialiased`}>
+      <body className="flex h-dvh overflow-hidden bg-ink-950 font-sans text-white selection:bg-sakura selection:text-ink-950">
         <PlayerProvider>
-          <div className="flex h-[calc(100dvh-var(--spacing-player))] gap-2 p-2">
-            <Sidebar />
-            <div className="flex min-w-0 flex-1 flex-col gap-2">
-              <MobileNav />
-              <main className="relative min-h-0 flex-1 overflow-y-auto rounded-lg bg-zinc-900">{children}</main>
-            </div>
+          <Sidebar />
+          <div className="flex min-w-0 flex-1 flex-col">
+            <MobileNav />
+            <main className="relative min-h-0 flex-1 overflow-y-auto bg-halftone pb-player">{children}</main>
           </div>
           <PlayerBar />
         </PlayerProvider>

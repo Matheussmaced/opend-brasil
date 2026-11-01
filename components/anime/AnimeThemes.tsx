@@ -1,22 +1,23 @@
 import type { Track } from "@/lib/types";
 import { TrackList } from "../track/TrackList";
+import { SectionHeading } from "../ui/SectionHeading";
 
-function ThemeSection({ title, tracks }: { title: string; tracks: Track[] }) {
+function ThemeSection({ title, kana, tracks }: { title: string; kana: string; tracks: Track[] }) {
   if (!tracks.length) return null;
   return (
     <section>
-      <h2 className="mb-3 text-xl font-bold">{title}</h2>
+      <SectionHeading title={title} kana={kana} />
       <TrackList tracks={tracks} showAnime={false} showCover={false} />
     </section>
   );
 }
 
 export function AnimeThemes({ tracks }: { tracks: Track[] }) {
-  if (!tracks.length) return <p className="text-zinc-400">Ainda não há vídeos para este anime no AnimeThemes.</p>;
+  if (!tracks.length) return <p className="text-ink-300">Ainda não há vídeos para este anime no AnimeThemes.</p>;
   return (
     <>
-      <ThemeSection title="Aberturas" tracks={tracks.filter((t) => t.type === "OP")} />
-      <ThemeSection title="Encerramentos" tracks={tracks.filter((t) => t.type !== "OP")} />
+      <ThemeSection title="Aberturas" kana="オープニング" tracks={tracks.filter((t) => t.type === "OP")} />
+      <ThemeSection title="Encerramentos" kana="エンディング" tracks={tracks.filter((t) => t.type !== "OP")} />
     </>
   );
 }

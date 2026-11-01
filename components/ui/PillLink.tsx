@@ -2,14 +2,14 @@ import Link from "next/link";
 import type { ComponentProps } from "react";
 
 const VARIANTS = {
-  solid: "bg-white text-black hover:scale-105",
-  outline: "border border-zinc-600 text-zinc-200 hover:border-white hover:text-white",
+  solid: "border-sakura bg-sakura text-ink-950 shadow-[3px_3px_0_0_var(--color-neon)] hover:-translate-y-0.5",
+  outline: "border-ink-500 text-ink-300 hover:border-neon hover:text-neon",
 };
 
 type Variant = keyof typeof VARIANTS;
 
 export function pillClass(variant: Variant = "solid") {
-  return `inline-flex items-center justify-center rounded-full px-5 py-2 text-sm font-bold transition disabled:opacity-40 ${VARIANTS[variant]}`;
+  return `inline-flex items-center justify-center gap-2 rounded-lg border-2 px-5 py-2 text-sm font-bold transition disabled:pointer-events-none disabled:opacity-40 ${VARIANTS[variant]}`;
 }
 
 export function PillLink({

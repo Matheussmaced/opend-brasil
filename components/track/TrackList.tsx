@@ -15,10 +15,10 @@ export function TrackList({ tracks, limit, showAnime = true, showCover = true }:
   const { playTracks } = usePlayer();
   const visible = limit ? tracks.slice(0, limit) : tracks;
 
-  if (!tracks.length) return <p className="px-2 text-sm text-zinc-500">Nenhuma música encontrada.</p>;
+  if (!tracks.length) return <p className="px-2 text-sm text-ink-300">Nenhuma música encontrada.</p>;
 
   return (
-    <ol className="flex flex-col">
+    <ol className="flex flex-col gap-1">
       {visible.map((track, i) => (
         <TrackRow
           key={`${track.id}-${i}`}

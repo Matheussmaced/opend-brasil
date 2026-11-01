@@ -11,7 +11,7 @@ export function PlayerExtras() {
   const audible = muted ? 0 : volume;
 
   return (
-    <div className="flex items-center justify-end gap-1 max-sm:hidden">
+    <div className="flex items-center justify-end sm:gap-1">
       <IconButton
         label={isVideo ? "Só áudio" : "Ver vídeo"}
         active={isVideo}
@@ -23,10 +23,17 @@ export function PlayerExtras() {
       <IconButton label="Fila" active={showQueue} onClick={() => setShowQueue(!showQueue)}>
         <QueueIcon />
       </IconButton>
-      <IconButton label={audible ? "Silenciar" : "Ativar som"} onClick={toggleMute}>
+      <IconButton label={audible ? "Silenciar" : "Ativar som"} onClick={toggleMute} className="max-lg:hidden">
         <VolumeIcon muted={audible === 0} />
       </IconButton>
-      <Slider label="Volume" value={audible} max={1} step={0.01} onChange={setVolume} className="w-24" />
+      <Slider
+        label="Volume"
+        value={audible}
+        max={1}
+        step={0.01}
+        onChange={setVolume}
+        className="w-20 max-lg:hidden xl:w-24"
+      />
     </div>
   );
 }

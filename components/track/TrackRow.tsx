@@ -18,7 +18,7 @@ type TrackRowProps = {
   onPlay: () => void;
 };
 
-const HOVER_ONLY = "opacity-0 group-hover:opacity-100 max-sm:hidden";
+const HOVER_ONLY = "max-sm:hidden pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100";
 
 export function TrackRow({ track, position, showAnime, showCover, onPlay }: TrackRowProps) {
   const { current, isPlaying, toggle, addToQueue, setMode } = usePlayer();
@@ -35,39 +35,45 @@ export function TrackRow({ track, position, showAnime, showCover, onPlay }: Trac
   return (
     <li
       onDoubleClick={play}
-      className={`group grid grid-cols-[2rem_1fr_auto] items-center gap-3 rounded-md px-2 py-2 hover:bg-white/10 sm:grid-cols-[2rem_1fr_1fr_auto] ${
-        isCurrent ? "bg-white/5" : ""
+      className={`group grid grid-cols-[2.75rem_1fr_auto] items-center gap-3 rounded-xl border-2 px-2 py-2 transition sm:grid-cols-[2.75rem_1fr_1fr_auto] ${
+        isCurrent
+          ? "border-sakura bg-sakura/10"
+          : "border-transparent hover:border-ink-700 hover:bg-ink-800/70"
       }`}
     >
       <button
         type="button"
         onClick={play}
         aria-label={isActive ? "Pausar" : `Tocar ${track.title}`}
-        className="grid size-8 place-items-center text-sm tabular-nums text-zinc-400"
+        className="grid h-10 place-items-center"
       >
-        <span className={`group-hover:hidden ${isCurrent ? "text-rose-400" : ""}`}>
-          {isActive ? <Equalizer /> : position}
+        <span
+          className={`font-display text-lg italic group-hover:hidden ${isCurrent ? "text-sakura" : "text-ink-500"}`}
+        >
+          {isActive ? <Equalizer /> : String(position).padStart(2, "0")}
         </span>
-        <span className="hidden text-white group-hover:block">
-          {isActive ? <PauseIcon width={16} height={16} /> : <PlayIcon width={16} height={16} />}
+        <span className="hidden size-8 rotate-45 place-items-center rounded-md bg-sakura text-ink-950 group-hover:grid">
+          <span className="-rotate-45">
+            {isActive ? <PauseIcon width={14} height={14} /> : <PlayIcon width={14} height={14} />}
+          </span>
         </span>
       </button>
 
       <div className="flex min-w-0 items-center gap-3">
-        {showCover && <Cover src={track.cover} alt="" width={40} className="size-10 rounded" />}
+        {showCover && <Cover src={track.cover} alt="" width={40} className="size-10 rounded-lg" />}
         <div className="min-w-0">
-          <p className={`truncate font-medium ${isCurrent ? "text-rose-400" : ""}`}>{track.title}</p>
-          <p className="truncate text-sm text-zinc-400">
+          <p className={`truncate font-bold ${isCurrent ? "text-sakura" : ""}`}>{track.title}</p>
+          <p className="truncate text-sm text-ink-300">
             <TypeBadge type={track.type}>{track.label}</TypeBadge>
-            {track.spoiler && <span className="mr-1 text-[10px] uppercase text-amber-400">spoiler</span>}
+            {track.spoiler && <span className="mr-1 text-[10px] font-bold uppercase text-sun">spoiler</span>}
             {track.artists}
           </p>
         </div>
       </div>
 
-      <div className="min-w-0 truncate text-sm text-zinc-400 max-sm:hidden">
+      <div className="min-w-0 truncate text-sm text-ink-300 max-sm:hidden">
         {showAnime ? (
-          <Link href={`/anime/${track.animeSlug}`} className="hover:text-white hover:underline">
+          <Link href={`/anime/${track.animeSlug}`} className="hover:text-neon hover:underline">
             {track.animeName}
           </Link>
         ) : (
@@ -80,7 +86,7 @@ export function TrackRow({ track, position, showAnime, showCover, onPlay }: Trac
           label={liked ? "Remover das curtidas" : "Curtir"}
           active={liked}
           onClick={() => toggleLike(track)}
-          className={liked ? "" : "sm:opacity-0 sm:group-hover:opacity-100"}
+          className={liked ? "" : "pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"}
         >
           <HeartIcon filled={liked} width={18} height={18} />
         </IconButton>

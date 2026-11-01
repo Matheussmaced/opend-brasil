@@ -16,11 +16,12 @@ export async function SeasonPlaylist({ season, title }: { season: SeasonRef; tit
     <section className="space-y-6">
       <SectionHeading
         eyebrow={label}
+        kana="今期のアニソン"
         title={title}
         actions={<PlaybackButtons tracks={openings} label={`Tocar aberturas de ${label}`} />}
       />
       <TrackList tracks={openings} limit={VISIBLE_TRACKS} />
-      <AnimeRow title={`Animes de ${label}`} href={seasonHref(season)} anime={anime} />
+      <AnimeRow title={`Animes de ${label}`} kana="今期" href={seasonHref(season)} anime={anime} />
     </section>
   );
 }

@@ -5,6 +5,8 @@ import { GenreTiles, SeasonTiles } from "@/components/catalog/BrowseTiles";
 import { LetterBar } from "@/components/catalog/LetterBar";
 import { CollectionSkeleton } from "@/components/collection/CollectionSkeleton";
 import { SearchBox } from "@/components/search/SearchBox";
+import { PageContainer } from "@/components/ui/PageContainer";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { TrackList } from "@/components/track/TrackList";
 import { search } from "@/lib/animethemes/queries";
 
@@ -21,7 +23,10 @@ async function readQuery(searchParams: SearchParams) {
 
 export default function SearchPage({ searchParams }: PageProps<"/search">) {
   return (
-    <div className="px-4 pt-6 pb-12 sm:px-8">
+    <PageContainer className="pt-8">
+      <h1 className="mb-4 font-display text-3xl tracking-wide">
+        Buscar <span className="text-base text-sakura-soft">さがす</span>
+      </h1>
       <Suspense fallback={<SearchBox initialQuery="" />}>
         <SearchField searchParams={searchParams} />
       </Suspense>
@@ -30,7 +35,7 @@ export default function SearchPage({ searchParams }: PageProps<"/search">) {
           <SearchResults searchParams={searchParams} />
         </Suspense>
       </div>
-    </div>
+    </PageContainer>
   );
 }
 
@@ -49,13 +54,13 @@ async function SearchResults({ searchParams }: { searchParams: SearchParams }) {
     <div className="space-y-10">
       {tracks.length > 0 && (
         <section>
-          <h2 className="mb-3 text-2xl font-bold">Músicas</h2>
+          <SectionHeading title="Músicas" kana="きょく" />
           <TrackList tracks={tracks} />
         </section>
       )}
       {anime.length > 0 && (
         <section>
-          <h2 className="mb-4 text-2xl font-bold">Animes</h2>
+          <SectionHeading title="Animes" kana="アニメ" />
           <AnimeGrid anime={anime} />
         </section>
       )}
@@ -69,7 +74,7 @@ function BrowseAll() {
       <GenreTiles title="Gêneros" />
       <SeasonTiles />
       <section>
-        <h2 className="mb-4 text-2xl font-bold">De A a Z</h2>
+        <SectionHeading title="De A a Z" kana="あいうえお" />
         <LetterBar />
       </section>
     </div>
@@ -79,8 +84,9 @@ function BrowseAll() {
 function NoResults({ query }: { query: string }) {
   return (
     <div className="py-16 text-center">
-      <p className="text-xl font-bold">Nada encontrado para “{query}”</p>
-      <p className="mt-2 text-sm text-zinc-400">
+      <p aria-hidden className="font-display text-4xl text-sakura">(・_・;)</p>
+      <p className="mt-3 font-display text-xl tracking-wide">Nada encontrado para “{query}”</p>
+      <p className="mt-2 text-sm text-ink-300">
         Tente o nome em romaji (ex.: “Shingeki no Kyojin”) ou o nome da música.
       </p>
     </div>
