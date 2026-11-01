@@ -50,11 +50,12 @@ function PlayPauseButton() {
       type="button"
       onClick={toggle}
       disabled={!current}
-      aria-label={isPlaying ? "Pausar" : "Tocar"}
+      aria-label={buffering ? "Carregando" : isPlaying ? "Pausar" : "Tocar"}
+      aria-busy={buffering}
       className="mx-1 grid size-10 rotate-45 place-items-center rounded-lg bg-linear-to-br from-sakura to-neon text-ink-950 shadow-[0_0_18px_-2px_var(--color-sakura)] transition hover:scale-110 disabled:opacity-40 disabled:shadow-none"
     >
       <span className="-rotate-45">
-        {isPlaying && buffering ? (
+        {buffering ? (
           <span className="block size-4 animate-spin rounded-full border-2 border-ink-950 border-t-transparent" />
         ) : isPlaying ? (
           <PauseIcon width={18} height={18} />

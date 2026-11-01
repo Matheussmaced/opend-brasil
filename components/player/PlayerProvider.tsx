@@ -3,8 +3,10 @@
 import { useCallback, useEffect, useMemo, useReducer, useRef, useState, type ReactNode } from "react";
 import type { Track } from "@/lib/types";
 import { useMediaSession, useSpacebar } from "./hooks";
+import { sourceFor } from "./media-source";
 import { PlaybackTimeContext, PlayerContext, type Mode, type PlaybackTime, type PlayerValue } from "./PlayerContext";
 import { initialQueueState, nextIndex, previousIndex, queueReducer } from "./queue-reducer";
+import { preloadSource } from "./preload";
 import { VideoStage } from "./VideoStage";
 
 const RESTART_THRESHOLD_SECONDS = 3;
@@ -12,15 +14,11 @@ const TIME_UPDATE_STEP_SECONDS = 0.25;
 
 type Resume = { at: number; play: boolean };
 
-function sourceFor(track: Track | null, mode: Mode) {
-  if (!track) return null;
-  return mode === "video" || !track.audioUrl ? track.videoUrl : track.audioUrl;
-}
-
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const mediaRef = useRef<HTMLVideoElement>(null);
   const resumeRef = useRef<Resume>({ at: 0, play: true });
   const lastTokenRef = useRef(0);
+  const upcomingRef = useRef<number | null>(null);
 
   const [queueState, dispatch] = useReducer(queueReducer, initialQueueState);
   const [mode, setModeState] = useState<Mode>("audio");
@@ -52,6 +50,11 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     if (play) media.play().catch(() => setIsPlaying(false));
   }, [source, playToken]);
 
+  useEffect(() => {
+    upcomingRef.current = nextIndex(queueState, true);
+  }, [queueState]);
+
+
   const playTracks = useCallback((tracks: Track[], start = 0) => {
     if (tracks.length) dispatch({ type: "play", tracks, start });
   }, []);
@@ -64,11 +67,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   const advance = useCallback(
     (auto: boolean) => {
-      const target = nextIndex(queueState, auto);
+      const upcoming = upcomingRef.current;
+      const target = shuffle && upcoming !== null ? upcoming : nextIndex(queueState, auto);
       if (target === null) mediaRef.current?.pause();
       else jumpTo(target);
     },
-    [queueState, jumpTo],
+    [queueState, shuffle, jumpTo],
   );
 
   const next = useCallback(() => advance(false), [advance]);
@@ -132,6 +136,12 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
     advance(true);
   };
 
+  const handlePlaying = () => {
+    setPlayback((p) => ({ ...p, buffering: false }));
+    const upcoming = upcomingRef.current;
+    if (upcoming !== null && upcoming !== index) preloadSource(sourceFor(queue[upcoming], mode));
+  };
+
   const handleError = () => {
     const media = mediaRef.current;
     if (media && current?.audioUrl && media.src === current.audioUrl) {
@@ -168,11 +178,15 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
             className="size-full object-contain"
             onClick={toggle}
             onPlay={() => setIsPlaying(true)}
-            onPause={() => setIsPlaying(false)}
+            onPause={() => {
+              setIsPlaying(false);
+              setPlayback((p) => ({ ...p, buffering: false }));
+            }}
             onEnded={handleEnded}
             onError={handleError}
+            onLoadStart={() => setPlayback((p) => ({ ...p, buffering: true }))}
             onWaiting={() => setPlayback((p) => ({ ...p, buffering: true }))}
-            onPlaying={() => setPlayback((p) => ({ ...p, buffering: false }))}
+            onPlaying={handlePlaying}
             onTimeUpdate={(e) => {
               const time = e.currentTarget.currentTime;
               setPlayback((p) => (Math.abs(p.time - time) < TIME_UPDATE_STEP_SECONDS ? p : { ...p, time }));

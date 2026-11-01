@@ -1,7 +1,9 @@
 "use client";
 
 import type { Track } from "@/lib/types";
+import { sourceFor } from "../player/media-source";
 import { usePlayer } from "../player/PlayerContext";
+import { usePreloadIntent } from "../player/usePreloadIntent";
 import { PauseIcon, PlayIcon, ShuffleIcon } from "../ui/icons";
 import { pillClass } from "../ui/PillLink";
 
@@ -15,12 +17,14 @@ function shuffled<T>(items: T[]): T[] {
 }
 
 export function PlayAllButton({ tracks, label = "Tocar tudo" }: { tracks: Track[]; label?: string }) {
-  const { playTracks, current, isPlaying, toggle } = usePlayer();
+  const { playTracks, current, isPlaying, mode, toggle } = usePlayer();
   const isThisPlaylist = current !== null && tracks.some((t) => t.id === current.id);
+  const preloadIntent = usePreloadIntent(() => (isThisPlaylist ? null : sourceFor(tracks[0] ?? null, mode)));
 
   return (
     <button
       type="button"
+      {...preloadIntent}
       onClick={() => (isThisPlaylist ? toggle() : playTracks(tracks))}
       disabled={!tracks.length}
       aria-label={label}

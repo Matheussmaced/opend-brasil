@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Dela_Gothic_One, Geist, Geist_Mono } from "next/font/google";
+import { preconnect } from "react-dom";
 import { MobileNav } from "@/components/layout/MobileNav";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { PlayerBar } from "@/components/player/PlayerBar";
@@ -32,7 +33,10 @@ export const metadata: Metadata = {
   applicationName: SITE.name,
 };
 
+const MEDIA_ORIGINS = ["https://a.animethemes.moe", "https://v.animethemes.moe"];
+
 export default function RootLayout({ children }: LayoutProps<"/">) {
+  MEDIA_ORIGINS.forEach((origin) => preconnect(origin));
   const fonts = `${geistSans.variable} ${geistMono.variable} ${delaGothic.variable}`;
 
   return (

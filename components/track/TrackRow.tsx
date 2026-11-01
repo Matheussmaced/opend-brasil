@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { toggleLike, useIsLiked } from "@/lib/likes";
 import type { Track } from "@/lib/types";
+import { sourceFor } from "../player/media-source";
 import { usePlayer } from "../player/PlayerContext";
+import { usePreloadIntent } from "../player/usePreloadIntent";
 import { Cover } from "../ui/Cover";
 import { HeartIcon, PauseIcon, PlayIcon, QueueIcon, VideoIcon } from "../ui/icons";
 import { IconButton } from "../ui/IconButton";
-import { Equalizer } from "./Equalizer";
+import { CurrentTrackStatus } from "./CurrentTrackStatus";
 import { TypeBadge } from "./TypeBadge";
 
 type TrackRowProps = {
@@ -21,11 +23,13 @@ type TrackRowProps = {
 const HOVER_ONLY = "max-sm:hidden pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100";
 
 export function TrackRow({ track, position, showAnime, showCover, onPlay }: TrackRowProps) {
-  const { current, isPlaying, toggle, addToQueue, setMode } = usePlayer();
+  const { current, isPlaying, mode, toggle, addToQueue, setMode } = usePlayer();
   const liked = useIsLiked(track.id);
   const isCurrent = current?.id === track.id;
   const isActive = isCurrent && isPlaying;
   const play = isCurrent ? toggle : onPlay;
+  const number = String(position).padStart(2, "0");
+  const preloadIntent = usePreloadIntent(() => (isCurrent ? null : sourceFor(track, mode)));
 
   const watch = () => {
     if (!isCurrent) onPlay();
@@ -34,6 +38,7 @@ export function TrackRow({ track, position, showAnime, showCover, onPlay }: Trac
 
   return (
     <li
+      {...preloadIntent}
       onDoubleClick={play}
       className={`group grid grid-cols-[2.75rem_1fr_auto] items-center gap-3 rounded-xl border-2 px-2 py-2 transition sm:grid-cols-[2.75rem_1fr_1fr_auto] ${
         isCurrent
@@ -50,7 +55,7 @@ export function TrackRow({ track, position, showAnime, showCover, onPlay }: Trac
         <span
           className={`font-display text-lg italic group-hover:hidden ${isCurrent ? "text-sakura" : "text-ink-500"}`}
         >
-          {isActive ? <Equalizer /> : String(position).padStart(2, "0")}
+          {isCurrent ? <CurrentTrackStatus isPlaying={isPlaying} position={number} /> : number}
         </span>
         <span className="hidden size-8 rotate-45 place-items-center rounded-md bg-sakura text-ink-950 group-hover:grid">
           <span className="-rotate-45">
