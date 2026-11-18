@@ -21,7 +21,7 @@ export function MobileMenu({ children }: { children: ReactNode }) {
   }, [open]);
 
   const closeOnLinkClick = (event: MouseEvent<HTMLElement>) => {
-    if ((event.target as HTMLElement).closest("a")) close();
+    if ((event.target as HTMLElement).closest("a, [data-close-menu]")) close();
   };
 
   return (

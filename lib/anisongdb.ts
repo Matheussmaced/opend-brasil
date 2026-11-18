@@ -1,4 +1,5 @@
 import { cacheLife } from "next/cache";
+import { FAST_AUDIO_ORIGIN } from "./media-hosts";
 
 const ENDPOINT = "https://anisongdb.com/api/mal_ids_request";
 const MAX_IDS_PER_REQUEST = 500;
@@ -6,7 +7,7 @@ const REVALIDATE_SECONDS = 60 * 60 * 24 * 7;
 const SONG_TYPE = /^(Opening|Ending) (\d+)$/;
 const TYPE_CODE: Record<string, string> = { Opening: "OP", Ending: "ED" };
 
-export const FAST_AUDIO_ORIGIN = "https://naedist.animemusicquiz.com";
+export { FAST_AUDIO_ORIGIN };
 
 type RawSong = {
   songType: string;

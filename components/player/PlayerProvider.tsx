@@ -5,22 +5,31 @@ import type { Track } from "@/lib/types";
 import { useMediaSession, useSpacebar } from "./hooks";
 import { fallbackSource, sourceFor } from "./media-source";
 import { PlaybackTimeContext, PlayerContext, type Mode, type PlaybackTime, type PlayerValue } from "./PlayerContext";
-import { initialQueueState, nextIndex, previousIndex, queueReducer } from "./queue-reducer";
+import { PlayerSyncContext, type PlayerSnapshot, type PlayerSync } from "./PlayerSyncContext";
+import { initialQueueState, nextIndex, previousIndex, queueReducer, type QueueState } from "./queue-reducer";
 import { preloadSource } from "./preload";
 import { VideoStage } from "./VideoStage";
 
 const RESTART_THRESHOLD_SECONDS = 3;
 const TIME_UPDATE_STEP_SECONDS = 0.25;
+const SYNC_DRIFT_SECONDS = 2;
 
 type Resume = { at: number; play: boolean };
+
+function sameTracks(a: QueueState["queue"], b: QueueState["queue"]) {
+  return a.length === b.length && a.every((track, i) => track.id === b[i].id);
+}
 
 export function PlayerProvider({ children }: { children: ReactNode }) {
   const mediaRef = useRef<HTMLVideoElement>(null);
   const resumeRef = useRef<Resume>({ at: 0, play: true });
   const lastTokenRef = useRef(0);
   const upcomingRef = useRef<number | null>(null);
+  const followerRef = useRef(false);
+  const syncListenersRef = useRef(new Set<() => void>());
 
   const [queueState, dispatch] = useReducer(queueReducer, initialQueueState);
+  const queueStateRef = useRef(queueState);
   const [mode, setModeState] = useState<Mode>("audio");
   const [isPlaying, setIsPlaying] = useState(false);
   const [volume, setVolumeState] = useState(0.8);
@@ -43,16 +52,80 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
       media.src = source;
       if (at > 0) media.addEventListener("loadedmetadata", () => (media.currentTime = at), { once: true });
     } else if (lastTokenRef.current !== playToken) {
-      media.currentTime = 0;
+      media.currentTime = at;
     }
     lastTokenRef.current = playToken;
 
     if (play) media.play().catch(() => setIsPlaying(false));
+    else media.pause();
   }, [source, playToken]);
 
   useEffect(() => {
     upcomingRef.current = nextIndex(queueState, true);
+    queueStateRef.current = queueState;
   }, [queueState]);
+
+  const notifySync = useCallback(() => syncListenersRef.current.forEach((listener) => listener()), []);
+
+  useEffect(() => notifySync(), [queue, index, notifySync]);
+
+  const sync = useMemo<PlayerSync>(
+    () => ({
+      subscribe: (listener) => {
+        syncListenersRef.current.add(listener);
+        return () => syncListenersRef.current.delete(listener);
+      },
+      getSnapshot: () => {
+        const media = mediaRef.current;
+        const { queue: tracks, index: position } = queueStateRef.current;
+        return {
+          queue: tracks,
+          index: position,
+          playing: Boolean(media && !media.paused),
+          time: media?.currentTime ?? 0,
+          ended: Boolean(media?.ended),
+        };
+      },
+      applySnapshot: (snapshot: PlayerSnapshot) => {
+        const media = mediaRef.current;
+        const local = queueStateRef.current;
+        if (!snapshot.queue.length) {
+          if (!media || media.paused) return false;
+          media.pause();
+          return true;
+        }
+        const sameQueue = sameTracks(local.queue, snapshot.queue);
+        if (!sameQueue || local.index !== snapshot.index) {
+          resumeRef.current = { at: snapshot.time, play: snapshot.playing };
+          dispatch(
+            sameQueue
+              ? { type: "jump", index: snapshot.index }
+              : { type: "play", tracks: snapshot.queue, start: snapshot.index },
+          );
+          return true;
+        }
+        if (!media?.src) return false;
+        let changed = false;
+        if (Math.abs(media.currentTime - snapshot.time) > SYNC_DRIFT_SECONDS) {
+          media.currentTime = snapshot.time;
+          changed = true;
+        }
+        if (snapshot.playing && media.paused) {
+          media.play().catch(() => setIsPlaying(false));
+          changed = true;
+        }
+        if (!snapshot.playing && !media.paused) {
+          media.pause();
+          changed = true;
+        }
+        return changed;
+      },
+      setFollower: (follower) => {
+        followerRef.current = follower;
+      },
+    }),
+    [],
+  );
 
 
   const playTracks = useCallback((tracks: Track[], start = 0) => {
@@ -127,6 +200,7 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
   );
 
   const handleEnded = () => {
+    if (followerRef.current) return;
     const media = mediaRef.current;
     if (repeat === "one" && media) {
       media.currentTime = 0;
@@ -168,37 +242,44 @@ export function PlayerProvider({ children }: { children: ReactNode }) {
 
   return (
     <PlayerContext.Provider value={value}>
-      <PlaybackTimeContext.Provider value={playback}>
-        {children}
-        <VideoStage>
-          <video
-            ref={mediaRef}
-            playsInline
-            preload="auto"
-            className="size-full object-contain"
-            onClick={toggle}
-            onPlay={() => setIsPlaying(true)}
-            onPause={() => {
-              setIsPlaying(false);
-              setPlayback((p) => ({ ...p, buffering: false }));
-            }}
-            onEnded={handleEnded}
-            onError={handleError}
-            onLoadStart={() => setPlayback((p) => ({ ...p, buffering: true }))}
-            onWaiting={() => setPlayback((p) => ({ ...p, buffering: true }))}
-            onPlaying={handlePlaying}
-            onTimeUpdate={(e) => {
-              const time = e.currentTarget.currentTime;
-              setPlayback((p) => (Math.abs(p.time - time) < TIME_UPDATE_STEP_SECONDS ? p : { ...p, time }));
-            }}
-            onDurationChange={(e) => {
-              const duration = e.currentTarget.duration;
-              setPlayback((p) => ({ ...p, duration: Number.isFinite(duration) ? duration : 0 }));
-            }}
-            onEmptied={() => setPlayback({ time: 0, duration: 0, buffering: false })}
-          />
-        </VideoStage>
-      </PlaybackTimeContext.Provider>
+      <PlayerSyncContext.Provider value={sync}>
+        <PlaybackTimeContext.Provider value={playback}>
+          {children}
+          <VideoStage>
+            <video
+              ref={mediaRef}
+              playsInline
+              preload="auto"
+              className="size-full object-contain"
+              onClick={toggle}
+              onPlay={() => {
+                setIsPlaying(true);
+                notifySync();
+              }}
+              onPause={() => {
+                setIsPlaying(false);
+                setPlayback((p) => ({ ...p, buffering: false }));
+                notifySync();
+              }}
+              onSeeked={notifySync}
+              onEnded={handleEnded}
+              onError={handleError}
+              onLoadStart={() => setPlayback((p) => ({ ...p, buffering: true }))}
+              onWaiting={() => setPlayback((p) => ({ ...p, buffering: true }))}
+              onPlaying={handlePlaying}
+              onTimeUpdate={(e) => {
+                const time = e.currentTarget.currentTime;
+                setPlayback((p) => (Math.abs(p.time - time) < TIME_UPDATE_STEP_SECONDS ? p : { ...p, time }));
+              }}
+              onDurationChange={(e) => {
+                const duration = e.currentTarget.duration;
+                setPlayback((p) => ({ ...p, duration: Number.isFinite(duration) ? duration : 0 }));
+              }}
+              onEmptied={() => setPlayback({ time: 0, duration: 0, buffering: false })}
+            />
+          </VideoStage>
+        </PlaybackTimeContext.Provider>
+      </PlayerSyncContext.Provider>
     </PlayerContext.Provider>
   );
 }

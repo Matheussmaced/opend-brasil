@@ -2,6 +2,7 @@ import { SITE } from "@/lib/site";
 import { LikedPlaylistLink } from "./LikedPlaylistLink";
 import { Logo } from "./Logo";
 import { NavLinks } from "./NavLinks";
+import { PlaylistLinks } from "./PlaylistLinks";
 
 export function SidebarContent({ showLogo = true }: { showLogo?: boolean }) {
   return (
@@ -24,11 +25,14 @@ export function SidebarContent({ showLogo = true }: { showLogo?: boolean }) {
         <NavLinks />
       </div>
 
-      <section className="relative space-y-3">
+      <section className="relative flex min-h-0 flex-col gap-3">
         <h2 className="px-1 text-xs font-bold tracking-widest text-neon">
           SUA BIBLIOTECA <span className="ml-1 text-sakura-soft/70">ライブラリ</span>
         </h2>
-        <LikedPlaylistLink />
+        <div className="-mx-1 flex min-h-0 flex-col gap-2 overflow-y-auto px-1 pb-1">
+          <LikedPlaylistLink />
+          <PlaylistLinks />
+        </div>
       </section>
 
       <Credits />

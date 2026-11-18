@@ -2,10 +2,11 @@ import type { FastAudioLookup } from "../anisongdb";
 import type { AnimeSummary, Track } from "../types";
 import type { RawAnime, RawImage, RawTheme, RawVideo } from "./raw-types";
 
+const COVER_FACET = "LARGE_COVER";
 const THEME_ORDER: Record<string, number> = { OP: 0, ED: 1 };
 
-function pickImage(images: RawImage[] | undefined, preferred: string): string | null {
-  if (!images?.length) return null;
+function pickImage({ nodes: images }: { nodes: RawImage[] }, preferred: string): string | null {
+  if (!images.length) return null;
   return images.find((i) => i.facet === preferred)?.link ?? images[0].link;
 }
 
@@ -33,40 +34,45 @@ export function toSummary(anime: RawAnime): AnimeSummary {
   return {
     id: anime.id,
     slug: anime.slug,
-    name: anime.name,
+    name: anime.title.romaji,
     year: anime.year,
-    season: anime.season,
-    format: anime.media_format,
-    cover: pickImage(anime.images, "Large Cover"),
+    season: anime.seasonLocalized,
+    format: anime.formatLocalized,
+    cover: pickImage(anime.images, COVER_FACET),
     synopsis: cleanSynopsis(anime.synopsis),
   };
 }
 
 export function malIdOf(anime: RawAnime): number | null {
-  return anime.resources?.find((r) => r.site === "MyAnimeList")?.external_id ?? null;
+  return anime.mal?.nodes[0]?.externalId ?? null;
+}
+
+export function anilistIdOf(anime: RawAnime): number | null {
+  return anime.anilist?.nodes[0]?.externalId ?? null;
 }
 
 export function themeToTracks(theme: RawTheme, anime: RawAnime, fastAudio: FastAudioLookup): Track[] {
-  const cover = pickImage(anime.images, "Large Cover");
-  const artists = theme.song?.artists?.map((a) => a.name).join(", ") || "Artista desconhecido";
+  const cover = pickImage(anime.images, COVER_FACET);
+  const songTitle = theme.song?.title.romaji ?? null;
+  const artists = theme.song?.performances.map((p) => p.artist.name.main).join(", ") || "Artista desconhecido";
   const fastAudioUrl = fastAudio({
     malId: malIdOf(anime),
     type: theme.type,
     sequence: theme.sequence ?? 1,
-    title: theme.song?.title ?? null,
+    title: songTitle,
   });
 
-  return (theme.animethemeentries ?? []).flatMap((entry) => {
-    if (!entry.videos?.length) return [];
-    const video = bestVideo(entry.videos);
+  return theme.animethemeentries.flatMap((entry) => {
+    if (!entry.videos.nodes.length) return [];
+    const video = bestVideo(entry.videos.nodes);
     const version = entry.version && entry.version > 1 ? ` v${entry.version}` : "";
     return {
       id: String(entry.id),
       label: `${theme.slug}${version}`,
       type: theme.type,
-      title: theme.song?.title || theme.slug,
+      title: songTitle || theme.slug,
       artists,
-      animeName: anime.name,
+      animeName: anime.title.romaji,
       animeSlug: anime.slug,
       cover,
       episodes: entry.episodes,

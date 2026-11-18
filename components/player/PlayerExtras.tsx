@@ -1,5 +1,6 @@
 "use client";
 
+import { TogetherButton } from "../together/TogetherButton";
 import { QueueIcon, VideoIcon, VolumeIcon } from "../ui/icons";
 import { IconButton } from "../ui/IconButton";
 import { Slider } from "../ui/Slider";
@@ -20,6 +21,7 @@ export function PlayerExtras() {
       >
         <VideoIcon />
       </IconButton>
+      <TogetherButton />
       <IconButton label="Fila" active={showQueue} onClick={() => setShowQueue(!showQueue)}>
         <QueueIcon />
       </IconButton>

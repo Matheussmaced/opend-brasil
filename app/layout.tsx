@@ -5,6 +5,7 @@ import { MobileNav } from "@/components/layout/MobileNav";
 import { Sidebar } from "@/components/layout/Sidebar";
 import { PlayerBar } from "@/components/player/PlayerBar";
 import { PlayerProvider } from "@/components/player/PlayerProvider";
+import { TogetherProvider } from "@/components/together/TogetherProvider";
 import { FAST_AUDIO_ORIGIN } from "@/lib/anisongdb";
 import { SITE } from "@/lib/site";
 import "./globals.css";
@@ -44,12 +45,14 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="pt-BR" className={`${fonts} h-full scheme-dark antialiased`}>
       <body className="flex h-dvh overflow-hidden bg-ink-950 font-sans text-white selection:bg-sakura selection:text-ink-950">
         <PlayerProvider>
-          <Sidebar />
-          <div className="flex min-w-0 flex-1 flex-col">
-            <MobileNav />
-            <main className="relative min-h-0 flex-1 overflow-y-auto bg-halftone pb-player">{children}</main>
-          </div>
-          <PlayerBar />
+          <TogetherProvider>
+            <Sidebar />
+            <div className="flex min-w-0 flex-1 flex-col">
+              <MobileNav />
+              <main className="relative min-h-0 flex-1 overflow-y-auto bg-halftone pb-player">{children}</main>
+            </div>
+            <PlayerBar />
+          </TogetherProvider>
         </PlayerProvider>
       </body>
     </html>

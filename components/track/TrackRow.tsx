@@ -6,8 +6,9 @@ import type { Track } from "@/lib/types";
 import { sourceFor } from "../player/media-source";
 import { usePlayer } from "../player/PlayerContext";
 import { usePreloadIntent } from "../player/usePreloadIntent";
+import { AddToPlaylistButton } from "../playlist/AddToPlaylistButton";
 import { Cover } from "../ui/Cover";
-import { HeartIcon, PauseIcon, PlayIcon, QueueIcon, VideoIcon } from "../ui/icons";
+import { CloseIcon, HeartIcon, PauseIcon, PlayIcon, QueueIcon, VideoIcon } from "../ui/icons";
 import { IconButton } from "../ui/IconButton";
 import { CurrentTrackStatus } from "./CurrentTrackStatus";
 import { TypeBadge } from "./TypeBadge";
@@ -18,11 +19,13 @@ type TrackRowProps = {
   showAnime: boolean;
   showCover: boolean;
   onPlay: () => void;
+  onRemove?: () => void;
 };
 
-const HOVER_ONLY = "max-sm:hidden pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100";
+const REVEAL_ON_HOVER = "pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100";
+const HOVER_ONLY = `max-sm:hidden ${REVEAL_ON_HOVER}`;
 
-export function TrackRow({ track, position, showAnime, showCover, onPlay }: TrackRowProps) {
+export function TrackRow({ track, position, showAnime, showCover, onPlay, onRemove }: TrackRowProps) {
   const { current, isPlaying, mode, toggle, addToQueue, setMode } = usePlayer();
   const liked = useIsLiked(track.id);
   const isCurrent = current?.id === track.id;
@@ -91,16 +94,22 @@ export function TrackRow({ track, position, showAnime, showCover, onPlay }: Trac
           label={liked ? "Remover das curtidas" : "Curtir"}
           active={liked}
           onClick={() => toggleLike(track)}
-          className={liked ? "" : "pointer-fine:opacity-0 pointer-fine:group-hover:opacity-100"}
+          className={liked ? "" : REVEAL_ON_HOVER}
         >
           <HeartIcon filled={liked} width={18} height={18} />
         </IconButton>
         <IconButton label="Assistir vídeo" onClick={watch} className={HOVER_ONLY}>
           <VideoIcon width={18} height={18} />
         </IconButton>
+        <AddToPlaylistButton track={track} className={REVEAL_ON_HOVER} />
         <IconButton label="Adicionar à fila" onClick={() => addToQueue(track)} className={HOVER_ONLY}>
           <QueueIcon width={18} height={18} />
         </IconButton>
+        {onRemove && (
+          <IconButton label="Remover da playlist" onClick={onRemove} className={`hover:text-sakura ${REVEAL_ON_HOVER}`}>
+            <CloseIcon width={18} height={18} />
+          </IconButton>
+        )}
       </div>
     </li>
   );

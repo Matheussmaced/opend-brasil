@@ -9,9 +9,10 @@ type TrackListProps = {
   limit?: number;
   showAnime?: boolean;
   showCover?: boolean;
+  onRemove?: (track: Track) => void;
 };
 
-export function TrackList({ tracks, limit, showAnime = true, showCover = true }: TrackListProps) {
+export function TrackList({ tracks, limit, showAnime = true, showCover = true, onRemove }: TrackListProps) {
   const { playTracks } = usePlayer();
   const visible = limit ? tracks.slice(0, limit) : tracks;
 
@@ -27,6 +28,7 @@ export function TrackList({ tracks, limit, showAnime = true, showCover = true }:
           showAnime={showAnime}
           showCover={showCover}
           onPlay={() => playTracks(tracks, i)}
+          onRemove={onRemove && (() => onRemove(track))}
         />
       ))}
     </ol>
